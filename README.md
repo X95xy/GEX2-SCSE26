@@ -5,9 +5,9 @@ In this graded exercise, you will develop a small library management system usin
 
 SETUP AND TESTING:
 - Create and activate a virtual environment
-- Install requirements using: uv pip install -r requirements.txt
+- Install requirements using:  uv pip install -r requirements.txt
     -- The above command will install pytest, which is required for testing
-- Once you have finished your program, test it using: uv run python -m pytest -v
+- Once you have finished your program, test it using:uv run python -m pytest -v
 - Once all the tests pass, then commit to your GitHub and submit only the GitHub link in Moodle
 
 -----------------------------------------------------------------------------------------------------------------------------------------------

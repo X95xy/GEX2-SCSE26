@@ -5,9 +5,9 @@
 # Replace "function_name1" with the actual function names you want to import.
 
 from admin import (
-    function_name1,
-    function_name2,
-    function_name3
+    load_library,
+    save_library,
+    find_book
 )
 
 
@@ -18,7 +18,12 @@ def books_in_category(
     books,
     category
 ):
-    pass
+    result = []
+    cat = category.strip().lower()
+    for book_id, book in books.items():
+        if book["category"].lower() == cat:
+            result.append(book_id)
+    return result
 
     
 
@@ -29,7 +34,12 @@ def search_by_title(
     books,
     search_text
 ):
-    pass
+    result = []
+    s = search_text.strip().lower()
+    for book_id, book in books.items():
+        if s in book["title"].lower():
+            result.append(book_id)
+    return result
     
 
 
@@ -45,7 +55,21 @@ def borrow_book(
     search_text,
     borrower
 ):
-    pass
+    # check empty name
+    if borrower.strip() == "":
+        return "EMPTY_NAME"
+
+    book_id = find_book(books, search_text)
+
+    if book_id is None:
+        return "BOOK_NOT_FOUND"
+
+    if books[book_id]["available"] == False:
+        return "NOT_AVAILABLE"
+
+    books[book_id]["available"] = False
+    loans.append({"book_id": book_id, "borrower": borrower})
+    return "OK"
 
     
 
@@ -63,9 +87,28 @@ def return_book(
     book_title,
     borrower
 ):
-    pass
+    # check empty name
+    if borrower.strip() == "":
+        return "EMPTY_NAME"
 
-    
+    book_id = find_book(books, book_title)
+
+    if book_id is None:
+        return "BOOK_NOT_FOUND"
+
+    # check if it is actually on loan
+    found = None
+    for i in range(len(loans)):
+        if loans[i]["book_id"] == book_id:
+            found = i
+            break
+
+    if found is None:
+        return "NOT_ON_LOAN"
+
+    books[book_id]["available"] = True
+    loans.pop(found)
+    return "OK"
 
 
 
@@ -76,5 +119,53 @@ def return_book(
 ## The program continues to display the menu until the user chooses to exit, at which point the library data is saved back to the JSON file.
 ## The main function should also handle invalid selections by displaying an error message and prompting the user to select again.
 def main():
-    pass
+    data = load_library("library.json")
+    books = data["books"]
+    loans = data["loans"]
 
+    print("LIBRARY USER SYSTEM")
+    print("------------------------------------------------------------")
+
+    while True:
+        print("1. Search by title")
+        print("2. Search by category")
+        print("3. Borrow a book")
+        print("4. Return a book")
+        print("5. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            t = input("Enter title to search: ")
+            res = search_by_title(books, t)
+            print("Found books: " + str(res))
+
+        elif choice == "2":
+            c = input("Enter category: ")
+            res = books_in_category(books, c)
+            print("Found books: " + str(res))
+
+        elif choice == "3":
+            bid = input("Enter book id or title: ")
+            name = input("Enter your name: ")
+            r = borrow_book(books, loans, bid, name)
+            print("Result: " + r)
+
+        elif choice == "4":
+            bid = input("Enter book id or title: ")
+            name = input("Enter your name: ")
+            r = return_book(books, loans, bid, name)
+            print("Result: " + r)
+
+        elif choice == "5":
+            save_library(data, "library.json")
+            print("Goodbye!")
+            break
+
+        else:
+            print("Invalid option, please try again.")
+
+    return
+
+
+if __name__ == "__main__":
+    main()
